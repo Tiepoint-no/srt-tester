@@ -80,11 +80,9 @@ echo "Starting GStreamer pipeline..."
 echo "Full SRT URI: ${FULL_SRT_URI}"
 echo "==========================================="
 
-# GStreamer pipeline: receive UDP, parse and send to SRT
+# GStreamer pipeline: receive UDP and pass through to SRT
+# Pass through raw MPEG-TS without demux/remux to preserve SPS/PPS headers
 exec gst-launch-1.0 -v \
     udpsrc port=${INPUT_PORT} \
-    ! tsdemux name=demux \
-    demux. ! queue ! h264parse ! mpegtsmux name=mux \
-    demux. ! queue ! aacparse ! mux. \
-    mux. ! queue \
+    ! queue \
     ! srtsink uri="${FULL_SRT_URI}"

@@ -18,9 +18,11 @@ echo "Bitrate: ${BITRATE}"
 ffmpeg -re \
   -f lavfi -i "testsrc=size=${VIDEO_WIDTH}x${VIDEO_HEIGHT}:rate=${FRAMERATE}" \
   -f lavfi -i "sine=frequency=1000:sample_rate=48000" \
-  -vf "drawtext=fontfile=/usr/share/fonts/ttf-dejavu/DejaVuSans-Bold.ttf:text='Test Video %{localtime\:%X}':x=(w-text_w)/2:y=h-60:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5" \
-  -c:v libx264 -preset veryfast -tune zerolatency \
+  -vf "drawtext=fontfile=/usr/share/fonts/ttf-dejavu/DejaVuSans-Bold.ttf:text='Test Video %{localtime\:%X}':x=(w-text_w)/2:y=h-60:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.5:boxborderw=5,format=yuv420p" \
+  -c:v libx264 -preset ultrafast -tune zerolatency \
   -b:v ${BITRATE} -maxrate ${BITRATE} -bufsize $((2 * ${BITRATE%k}))k \
-  -g $((FRAMERATE * 2)) -keyint_min ${FRAMERATE} \
-  -c:a aac -b:a 128k -ar 48000 \
-  -f mpegts "udp://${OUTPUT_HOST}:${OUTPUT_PORT}?pkt_size=1316"
+  -g ${FRAMERATE} -keyint_min ${FRAMERATE} -sc_threshold 0 \
+  -x264-params "repeat-headers=1" \
+  -c:a aac -b:a 128k -ar 48000 -ac 1 \
+  -f mpegts -mpegts_copyts 1 -mpegts_start_pid 256 \
+  "udp://${OUTPUT_HOST}:${OUTPUT_PORT}?pkt_size=1316"
