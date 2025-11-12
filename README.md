@@ -67,12 +67,15 @@ BITRATE=2000k             # Video bitrate
 ```env
 SRT_URL=srt://host.docker.internal:9000    # SRT server URL
 USE_SRT_PARAMS=true                         # Use query parameters (true) or bare URL (false)
-SRT_MODE=caller                             # Connection mode: caller, listener, or rendezvous
-SRT_LATENCY=125                             # Latency in milliseconds
-SRT_STREAMID=                               # Optional stream identifier
+SRT_MODE=                                   # Connection mode: caller, listener, or rendezvous (leave empty to omit)
+SRT_LATENCY=                                # Latency in milliseconds (leave empty to omit)
+SRT_STREAMID=                               # Optional stream identifier (leave empty to omit)
 ```
 
-**Note:** When `USE_SRT_PARAMS=false`, only the bare `SRT_URL` is used without any query parameters. This is useful for testing or when your SRT server has specific requirements.
+**Note:**
+- When `USE_SRT_PARAMS=false`, only the bare `SRT_URL` is used without any query parameters
+- When `USE_SRT_PARAMS=true`, parameters are **only added to the URI if they are explicitly set**
+- Leave parameters empty to omit them from the URI completely
 
 ### Encryption Settings
 
@@ -84,7 +87,7 @@ SRT_PBKEYLEN=16            # Key length: 16 (AES-128), 24 (AES-192), or 32 (AES-
 
 ## Example Configurations
 
-### Basic Streaming (No Encryption)
+### Basic Streaming with Mode and Latency
 
 ```env
 SRT_URL=srt://192.168.1.100:9000
@@ -94,17 +97,30 @@ SRT_LATENCY=125
 ENABLE_ENCRYPTION=false
 ```
 
-### Bare URL (No Parameters)
+### Bare URL (No Parameters at All)
 
 ```env
 SRT_URL=srt://192.168.1.100:9000
 USE_SRT_PARAMS=false
 ```
+Result: `srt://192.168.1.100:9000`
+
+### URL Without Query Parameters (Let Server Use Defaults)
+
+```env
+SRT_URL=srt://192.168.1.100:9000
+USE_SRT_PARAMS=true
+SRT_MODE=
+SRT_LATENCY=
+ENABLE_ENCRYPTION=false
+```
+Result: `srt://192.168.1.100:9000` (same as bare URL)
 
 ### Encrypted Streaming
 
 ```env
 SRT_URL=srt://192.168.1.100:9000
+USE_SRT_PARAMS=true
 SRT_MODE=caller
 SRT_LATENCY=125
 ENABLE_ENCRYPTION=true
